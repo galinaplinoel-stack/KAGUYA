@@ -29,7 +29,9 @@ KAGUYA is a modular **Personality Operating Layer** for AI systems. It gives AI 
 - **Persistent Identity** — consistent personality across conversations
 - **Emotional Intelligence** — real-time mood simulation with decay
 - **Relationship Memory** — per-user trust, familiarity, and affinity tracking
-- **Response Modification** — LLM output shaped by personality + emotion + relationships
+- **Memory System** — personality-influenced memory storage and retrieval
+- **Conversation Memory** — persistent conversation tracking with auto-summarization
+- **Response Modification** — LLM output shaped by personality + emotion + relationships + memory
 - **Personality Evolution** — traits gradually change based on interactions
 
 ## Architecture
@@ -41,6 +43,8 @@ KAGUYA is a modular **Personality Operating Layer** for AI systems. It gives AI 
 │ Personality │  Emotion    │ Relationship│ Evolution │
 │   Core      │  Engine     │  System     │  Engine   │
 ├─────────────┴─────────────┴─────────────┴───────────┤
+│              Memory System + Conversation            │
+├─────────────────────────────────────────────────────┤
 │              Response Modifier Middleware             │
 ├─────────────────────────────────────────────────────┤
 │         Storage Layer (SQLite / PostgreSQL)          │
@@ -103,6 +107,41 @@ profile = kuudere(name="Ice Queen")
 profile = chaotic_gremlin(name="Gremlin")
 ```
 
+### Memory System
+
+```python
+from kaguya.memory.memory import MemoryManager
+from kaguya.memory.retrieval import MemoryRetrieval
+from kaguya.memory.conversation import ConversationMemory
+
+# Initialize memory
+mm = MemoryManager()
+retrieval = MemoryRetrieval(mm)
+conversation = ConversationMemory(mm)
+
+# Store memories
+mm.store("User loves cats", memory_type="fact", importance=0.9, tags=["pets"])
+mm.store("User had a bad day", memory_type="emotion", emotional_valence=-0.7)
+
+# Retrieve with personality bias
+traits = {"empathy": 0.9, "sensitivity": 0.8}
+memories = mm.retrieve("cats", personality_traits=traits)
+
+# Build context for LLM
+context = retrieval.build_context("Tell me about pets", personality_traits=traits)
+
+# Track conversations
+conversation.add_turn("conv_1", "user", "I love anime!", sentiment=0.8)
+conversation.add_turn("conv_1", "assistant", "Me too!")
+conversation.summarize_conversation("conv_1")  # Forms long-term memory
+```
+
+**Personality-Influenced Memory:**
+- Emotional personalities remember emotional events more strongly
+- Social personalities prioritize interpersonal memories
+- Curious personalities remember novel experiences
+- Creative personalities remember creative things
+
 ### REST API
 
 ```bash
@@ -129,9 +168,10 @@ curl -X POST http://localhost:8000/chat \
 | 🎭 **Personality Traits** | 10+ traits with float precision (0.0-1.0) |
 | 💜 **Emotion Engine** | Valence-Arousal model with decay and transitions |
 | 💕 **Relationships** | Per-user trust, familiarity, affinity, respect |
-| 🧠 **Memory Bias** | Personality-influenced memory retrieval |
+| 🧠 **Memory System** | Personality-influenced memory storage and retrieval |
+| 💬 **Conversation Memory** | Persistent conversation tracking with auto-summarization |
 | 📈 **Evolution** | Gradual trait changes from interactions |
-| 🔧 **Response Modifier** | LLM prompt enhancement based on state |
+| 🔧 **Response Modifier** | LLM prompt enhancement based on state + memory |
 | 🎨 **Character Presets** | tsundere, kuudere, chaotic_gremlin, and more |
 | 🖥️ **Dashboard** | Futuristic dark-mode visualization |
 | 🐳 **Docker** | One-command deployment |
