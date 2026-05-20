@@ -13,12 +13,7 @@ router = APIRouter()
 
 @router.post("", response_model=ChatResponse)
 async def chat_with_personality(req: ChatRequest):
-    """Generate a personality-enhanced prompt for LLM consumption.
-
-    This endpoint doesn't call an LLM directly — it returns the
-    modified system prompt and context that should be used with
-    any OpenAI-compatible API.
-    """
+    """Generate a personality-enhanced prompt for LLM consumption."""
     profile = _profiles.get(req.personality_id)
     if not profile:
         raise HTTPException(404, "Personality not found")
@@ -30,9 +25,9 @@ async def chat_with_personality(req: ChatRequest):
     modified_prompt = modifier.modify_prompt(req.base_prompt, req.user_id)
 
     # Record this interaction
-    rel_manager.record_interaction(req.user_id, sentiment=0.0)
+    rel_manager.evolve(req.user_id, sentiment=0.0)
 
-    state = emotion_engine.current_state
+    state = emotion_engine.state
     rel = rel_manager.get_relationship(req.user_id)
 
     return ChatResponse(
@@ -47,5 +42,5 @@ async def chat_with_personality(req: ChatRequest):
             "trust": rel.trust,
             "familiarity": rel.familiarity,
             "affinity": rel.affinity,
-        } if rel else None,
+        },
     )

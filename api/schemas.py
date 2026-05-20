@@ -35,7 +35,7 @@ class PersonalityResponse(BaseModel):
     name: str
     traits: dict[str, float]
     preset: Optional[str] = None
-    created_at: float
+    created_at: str
 
 
 # Emotion schemas

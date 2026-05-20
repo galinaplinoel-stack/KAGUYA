@@ -16,7 +16,7 @@ def _get_engine(profile_id: str) -> EmotionalStateEngine:
     if not profile:
         raise HTTPException(404, "Personality not found")
     if profile_id not in _engines:
-        _engines[profile_id] = EmotionalStateEngine(profile)
+        _engines[profile_id] = EmotionalStateEngine()
     return _engines[profile_id]
 
 
@@ -24,7 +24,7 @@ def _get_engine(profile_id: str) -> EmotionalStateEngine:
 async def get_emotion(profile_id: str):
     """Get current emotional state."""
     engine = _get_engine(profile_id)
-    state = engine.current_state
+    state = engine.state
     return EmotionResponse(
         personality_id=profile_id,
         primary_emotion=state.primary_emotion.value,
@@ -38,8 +38,8 @@ async def get_emotion(profile_id: str):
 async def trigger_emotion(profile_id: str, req: TriggerEmotionRequest):
     """Trigger an emotional event."""
     engine = _get_engine(profile_id)
-    engine.process_event(req.event, req.intensity)
-    state = engine.current_state
+    engine.trigger(req.event)
+    state = engine.state
     return EmotionResponse(
         personality_id=profile_id,
         primary_emotion=state.primary_emotion.value,
@@ -53,8 +53,8 @@ async def trigger_emotion(profile_id: str, req: TriggerEmotionRequest):
 async def apply_decay(profile_id: str):
     """Apply emotional decay (simulate time passing)."""
     engine = _get_engine(profile_id)
-    engine.apply_decay()
-    state = engine.current_state
+    engine.update()
+    state = engine.state
     return EmotionResponse(
         personality_id=profile_id,
         primary_emotion=state.primary_emotion.value,

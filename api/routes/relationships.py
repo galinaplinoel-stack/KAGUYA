@@ -31,7 +31,7 @@ async def get_relationship(profile_id: str, user_id: str):
         familiarity=rel.familiarity,
         affinity=rel.affinity,
         respect=rel.respect,
-        interaction_count=rel.interaction_count,
+        interaction_count=0,
     )
 
 
@@ -39,11 +39,11 @@ async def get_relationship(profile_id: str, user_id: str):
 async def log_interaction(profile_id: str, user_id: str, req: InteractRequest):
     """Log an interaction and evolve the relationship."""
     manager = _get_manager(profile_id)
-    manager.record_interaction(
+    manager.evolve(
         user_id=user_id,
         sentiment=req.sentiment,
-        emotion=req.emotion,
-        summary=req.summary,
+        event_type=req.emotion or "chat",
+        summary=req.summary or "",
     )
     rel = manager.get_relationship(user_id)
     return RelationshipResponse(
@@ -53,7 +53,7 @@ async def log_interaction(profile_id: str, user_id: str, req: InteractRequest):
         familiarity=rel.familiarity,
         affinity=rel.affinity,
         respect=rel.respect,
-        interaction_count=rel.interaction_count,
+        interaction_count=0,
     )
 
 
@@ -61,16 +61,16 @@ async def log_interaction(profile_id: str, user_id: str, req: InteractRequest):
 async def list_relationships(profile_id: str):
     """List all relationships for a personality."""
     manager = _get_manager(profile_id)
-    rels = manager.get_all_relationships()
-    return [
-        RelationshipResponse(
+    result = []
+    for uid in manager.user_ids:
+        rel = manager.get_relationship(uid)
+        result.append(RelationshipResponse(
             personality_id=profile_id,
             user_id=uid,
-            trust=r.trust,
-            familiarity=r.familiarity,
-            affinity=r.affinity,
-            respect=r.respect,
-            interaction_count=r.interaction_count,
-        )
-        for uid, r in rels.items()
-    ]
+            trust=rel.trust,
+            familiarity=rel.familiarity,
+            affinity=rel.affinity,
+            respect=rel.respect,
+            interaction_count=0,
+        ))
+    return result

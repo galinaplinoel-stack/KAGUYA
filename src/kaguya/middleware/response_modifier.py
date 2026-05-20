@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Optional
 
 from kaguya.personality.profile import CharacterProfile
+from kaguya.personality.style import CommunicationStyle
 from kaguya.emotion.engine import EmotionalStateEngine
 from kaguya.relationships.manager import RelationshipManager
 
@@ -45,7 +46,7 @@ class ResponseModifier:
         # Personality traits
         sections.append(self._build_trait_directives())
 
-        # Communication style
+        # Communication style (derived from traits)
         sections.append(self._build_style_directives())
 
         # Emotional state
@@ -81,35 +82,15 @@ class ResponseModifier:
         return "\n".join(directives)
 
     def _build_style_directives(self) -> str:
-        """Generate communication style directives."""
-        style = self.profile.communication_style
+        """Generate communication style directives from traits."""
+        style = CommunicationStyle.from_traits(self.profile.traits)
         directives = ["[Communication Style]"]
-
-        if style.formality > 0.7:
-            directives.append("Use formal, professional language.")
-        elif style.formality < 0.3:
-            directives.append("Use casual, relaxed language.")
-
-        if style.verbosity > 0.7:
-            directives.append("Be detailed and thorough in responses.")
-        elif style.verbosity < 0.3:
-            directives.append("Be concise and to the point.")
-
-        if style.humor_frequency > 0.7:
-            directives.append("Include humor and wit frequently.")
-        elif style.humor_frequency > 0.4:
-            directives.append("Occasionally include light humor.")
-
-        if style.emotional_expression > 0.7:
-            directives.append("Express emotions openly and vividly.")
-        elif style.emotional_expression < 0.3:
-            directives.append("Maintain emotional composure.")
-
+        directives.append(style.to_prompt_snippet())
         return "\n".join(directives)
 
     def _build_emotion_directives(self) -> str:
         """Generate directives based on current emotional state."""
-        state = self.emotion.current_state
+        state = self.emotion.state
         directives = [f"[Emotional State: {state.primary_emotion.value} "
                      f"(intensity: {state.intensity:.1%})]"]
 
@@ -130,14 +111,10 @@ class ResponseModifier:
         directives.append(f"- Familiarity: {rel.familiarity:.0%}")
         directives.append(f"- Affinity: {rel.affinity:.0%}")
 
-        if rel.trust < 0.3:
-            directives.append("Be cautious and guarded with this user.")
-        elif rel.trust > 0.8:
-            directives.append("This is a trusted user. Be open and warm.")
-
-        if rel.familiarity < 0.2:
-            directives.append("This user is new. Be welcoming but formal.")
-        elif rel.familiarity > 0.7:
-            directives.append("This is a well-known user. Be comfortable and familiar.")
+        # Get behavior modifier from relationship
+        behavior = self.relationships.get_behavior_modifier(user_id)
+        behavior_prompt = behavior.to_prompt_snippet()
+        if behavior_prompt:
+            directives.append(behavior_prompt)
 
         return "\n".join(directives)

@@ -24,16 +24,17 @@ async def create_personality(req: CreatePersonalityRequest):
     profile_id = str(uuid.uuid4())[:8]
 
     if req.preset:
-        profile = get_preset(req.preset, name=req.name)
+        profile = get_preset(req.preset)
+        profile.name = req.name
         if not profile:
             raise HTTPException(404, f"Preset '{req.preset}' not found")
     else:
         traits = TraitVector(**(req.traits.model_dump() if req.traits else {}))
-        profile = CharacterProfile(name=req.name, id=profile_id, traits=traits)
+        profile = CharacterProfile(name=req.name, profile_id=profile_id, traits=traits)
 
     _profiles[profile_id] = profile
     return PersonalityResponse(
-        id=profile.id,
+        id=profile.profile_id,
         name=profile.name,
         traits=profile.traits.to_dict(),
         preset=req.preset,
@@ -48,7 +49,7 @@ async def get_personality(profile_id: str):
     if not profile:
         raise HTTPException(404, "Personality not found")
     return PersonalityResponse(
-        id=profile.id,
+        id=profile.profile_id,
         name=profile.name,
         traits=profile.traits.to_dict(),
         preset=getattr(profile, "preset", None),
@@ -71,7 +72,7 @@ async def update_personality(profile_id: str, req: UpdatePersonalityRequest):
                 setattr(profile.traits, key, value)
 
     return PersonalityResponse(
-        id=profile.id,
+        id=profile.profile_id,
         name=profile.name,
         traits=profile.traits.to_dict(),
         created_at=profile.created_at,
@@ -83,7 +84,7 @@ async def list_personalities():
     """List all personality profiles."""
     return [
         PersonalityResponse(
-            id=p.id, name=p.name, traits=p.traits.to_dict(),
+            id=p.profile_id, name=p.name, traits=p.traits.to_dict(),
             created_at=p.created_at,
         )
         for p in _profiles.values()

@@ -12,11 +12,7 @@ router = APIRouter()
 
 @router.websocket("/{profile_id}")
 async def stream_personality_state(websocket: WebSocket, profile_id: str):
-    """Stream real-time personality state updates via WebSocket.
-
-    Sends JSON updates every 2 seconds with current emotional state,
-    personality traits, and any recent changes.
-    """
+    """Stream real-time personality state updates via WebSocket."""
     if profile_id not in _profiles:
         await websocket.close(code=4004, reason="Personality not found")
         return
@@ -27,7 +23,7 @@ async def stream_personality_state(websocket: WebSocket, profile_id: str):
 
     try:
         while True:
-            state = engine.current_state
+            state = engine.state
             data = {
                 "type": "state_update",
                 "personality_id": profile_id,
