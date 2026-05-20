@@ -13,6 +13,7 @@ from kaguya.storage.database import Database, get_engine
 from kaguya.config import Settings
 
 from api.routes import personality, emotion, relationships, evolution, chat
+from api.routes import memory
 from api.websocket import router as ws_router
 
 
@@ -29,7 +30,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(
     title="KAGUYA — AI Personality Engine",
     description="Production-grade personality infrastructure for AI beings.",
-    version="0.1.0",
+    version="0.2.0",
     lifespan=lifespan,
 )
 
@@ -48,20 +49,21 @@ app.include_router(emotion.router, prefix="/emotion", tags=["Emotion"])
 app.include_router(relationships.router, prefix="/relationships", tags=["Relationships"])
 app.include_router(evolution.router, prefix="/evolution", tags=["Evolution"])
 app.include_router(chat.router, prefix="/chat", tags=["Chat"])
+app.include_router(memory.router, prefix="/memory", tags=["Memory"])
 app.include_router(ws_router, prefix="/ws", tags=["WebSocket"])
 
 # Serve dashboard static files
 try:
     app.mount("/dashboard", StaticFiles(directory="dashboard", html=True), name="dashboard")
 except Exception:
-    pass  # Dashboard not built yet
+    pass
 
 
 @app.get("/")
 async def root():
     return {
         "name": "KAGUYA — AI Personality Engine",
-        "version": "0.1.0",
+        "version": "0.2.0",
         "docs": "/docs",
         "dashboard": "/dashboard",
     }
