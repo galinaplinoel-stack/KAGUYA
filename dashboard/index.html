@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KAGUYA — Personality Engine Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <h1>🌙 KAGUYA</h1>
+                <span class="subtitle">Personality Engine Dashboard</span>
+            </div>
+            <div class="status" id="status">
+                <span class="dot"></span> Connected
+            </div>
+        </header>
+
+        <div class="grid">
+            <!-- Personality Radar -->
+            <div class="card glass" id="personality-card">
+                <h2>🎭 Personality Traits</h2>
+                <canvas id="radar-chart" width="300" height="300"></canvas>
+                <div id="trait-bars"></div>
+            </div>
+
+            <!-- Emotion State -->
+            <div class="card glass" id="emotion-card">
+                <h2>💜 Emotional State</h2>
+                <div class="emotion-display">
+                    <div class="emotion-icon" id="emotion-icon">😊</div>
+                    <div class="emotion-name" id="emotion-name">Neutral</div>
+                    <div class="emotion-intensity">
+                        <div class="intensity-bar">
+                            <div class="intensity-fill" id="intensity-fill"></div>
+                        </div>
+                        <span id="intensity-value">50%</span>
+                    </div>
+                </div>
+                <div class="emotion-metrics">
+                    <div class="metric">
+                        <label>Valence</label>
+                        <div class="metric-bar"><div class="metric-fill" id="valence-fill"></div></div>
+                    </div>
+                    <div class="metric">
+                        <label>Arousal</label>
+                        <div class="metric-bar"><div class="metric-fill" id="arousal-fill"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Relationships -->
+            <div class="card glass" id="relationships-card">
+                <h2>💕 Relationships</h2>
+                <div id="relationship-list" class="relationship-list">
+                    <div class="empty-state">No relationships yet</div>
+                </div>
+            </div>
+
+            <!-- Tone Output -->
+            <div class="card glass" id="tone-card">
+                <h2>🗣️ Response Tone</h2>
+                <div id="tone-display" class="tone-grid">
+                    <div class="tone-item"><label>Warmth</label><span id="tone-warmth">50%</span></div>
+                    <div class="tone-item"><label>Humor</label><span id="tone-humor">50%</span></div>
+                    <div class="tone-item"><label>Formality</label><span id="tone-formality">50%</span></div>
+                    <div class="tone-item"><label>Verbosity</label><span id="tone-verbosity">50%</span></div>
+                </div>
+            </div>
+
+            <!-- Mood Timeline -->
+            <div class="card glass full-width" id="timeline-card">
+                <h2>📈 Mood Timeline</h2>
+                <canvas id="timeline-chart" width="800" height="150"></canvas>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
