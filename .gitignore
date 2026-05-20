@@ -52,3 +52,4 @@ venv.bak/
 .db
 *.sqlite
 *.sqlite3
+kaguya.db
